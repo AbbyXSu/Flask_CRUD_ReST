@@ -14,6 +14,8 @@
 from .helper import add_to_list
 from.helper import get_all_items
 from .helper import getone_item
+from.helper import update_status
+from.helper import delete_item
 from os import error
 #import helper
 from flask import Flask, request, Response
@@ -80,4 +82,39 @@ def get_one_item():
         'status': status
     }
     response = Response(json.dumps(res_data), status=200, mimetype='application/json')
+    return response
+
+@app.route('/item/update', methods=["Put"])
+def updateStatus():
+#Get items from the POST body
+    req_data = request.get_json()
+    item = req_data["item"]
+    status = req_data["status"]
+    res_data =update_status(item,status)
+
+#Return error if the status could not be updated/none
+    if not res_data:
+        response = Response("{'error': 'Error updating item - '" + item + ", " + status+"}", status=400 , mimetype='application/json')
+        return response
+      # Return response
+    response = Response(json.dumps(res_data), mimetype='application/json')
+
+    return response
+
+@app.route('/item/remove', methods=['DELETE'])
+def deleteItem():
+    # Get item from the POST body
+    req_data = request.get_json()
+    item = req_data['item']
+
+    # Delete item from the list
+    res_data = delete_item(item)
+
+    # Return error if the item could not be deleted
+    if res_data is None:
+        response = Response("{'error': 'Error deleting item - '" + item +  "}", status=400 , mimetype='application/json')
+        return response
+
+    # Return response
+    response = Response(json.dumps(res_data), mimetype='application/json')
     return response

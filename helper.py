@@ -12,7 +12,7 @@ import sqlite3
 DB_Path = "./todo_service_flask/todo.db"
 NOTSTARTED = "Not started"
 INPROGRESS ="In Progress"
-Completed = "Completed"
+COMPLETED = "Completed"
 
 def add_to_list(item):
     try:
@@ -67,4 +67,41 @@ def getone_item(item):
         return status
     except Exception as e:
         print("error:",e)
+        return None
+    
+#Updating Items
+# here I will update the status of the items by setting an function
+def update_status(item,status):
+#make sure the value of teh status is valid
+    if (status.lower().strip()== "not started"):
+        status = NOTSTARTED
+    elif (status.lower().strip() == "in progress"):
+        status = INPROGRESS
+    elif (status.lower().strip() == "completed"):
+        status = COMPLETED
+    else:
+        print ("invalid Status: " + status)
+        return None
+#here the code will execute the update of the database
+    try:
+        conn =sqlite3.connect(DB_Path)
+        c = conn.cursor()
+        c.execute("update items set status =? where item=?",(status,item))
+        conn.commit()
+        return {item:status}
+    except Exception as e:
+        print("Error", e)
+        return None
+
+def delete_item(item):
+    try:
+        conn=sqlite3.connect(DB_Path)
+        c=conn.cursor()
+        c.execute("delete from items where item =?",(item,))
+#note that (item,) is not a typo. We need to pass execute() a tuple even if there is only one item in the tuple.
+# Adding the comma forces this to become a tuple.
+        conn.commit()
+        return {"item":item, 'message':'deleted'}
+    except Exception as e:
+        print ("Error:", e )
         return None
